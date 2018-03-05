@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <numeric>
 #include <stdio.h>
 
 using namespace std;
@@ -27,7 +28,12 @@ typedef struct number{
     int end;
 } number;
 
-vector< vector<int> > input_vector = {{1 , 2, 0, 0 , 3}, {4 , 5, 6, 0, 0}, {0 , 7, 8, 0, 9}, {0, 0, 0, 10, 0}, {11 , 0, 0, 0 , 12}};
+vector<vector<int>> input_vector = {{1 , 2, 0, 0 , 3}, {4 , 5, 6, 0, 0}, {0 , 7, 8, 0, 9}, {0, 0, 0, 10, 0}, {11 , 0, 0, 0 , 12}};
+
+int retrieveElementFM( vector<vector<int>>* input, int row_id, int col_id){
+    int element = (*input)[row_id][col_id];
+    return element;
+}
 
 int retrieveElement( comp_r_mat* input, int row_id, int col_id){
     int element = 0;
@@ -76,6 +82,18 @@ int productAx( comp_r_mat* A, vector<int>* x, vector<int>* b ){
                 product = product + value;
             }
             b->push_back(product);
+        }
+        return 0;
+    }
+    return 1;
+}
+
+int productAxFM( vector< vector<int>>* input, vector<int>* x, vector<int>* b){
+    if((*input)[0].size() == (*x).size()){
+        int rows = (*input).size();
+        for( int i=0; i<rows; i++ ){
+            int product = inner_product((*input)[i].begin(), (*input)[i].end(), (*x).begin(), 0);
+            (*b).push_back(product);
         }
         return 0;
     }
@@ -134,23 +152,24 @@ double TwoPointGausApprox ( double x_lo, double x_hi, double h){
 
 int main(int argc, const char * argv[]) {
     //Hacker Practice 3.4
-    double x_lo = -1.0;
-    double x_hi = 1.0;
-    double h = 0.1;
-    cout << "(Quadrature Schemes, Numerical Approximation, Error) = " << endl << endl;
-    double rect_approx = RectApprox(x_lo, x_hi, h);
-    cout << "(Rectangle Approximation, " << rect_approx << ", " << error_calc(rect_approx) << ") " << endl;
-    double trapezoid_approx = TrapApprox(x_lo, x_hi, h);
-    cout << "(Trapezoid Approximation, " << trapezoid_approx << ", " << error_calc(trapezoid_approx) << ") " << endl;
-    double mid_pt_approx = MidptApprox(x_lo, x_hi, h);
-    cout << "(Mid-point Approximation, " << mid_pt_approx << ", " << error_calc(mid_pt_approx) << ") " << endl;
-    double simpson_approx = SimpsonApprox(x_lo, x_hi, h);
-    cout << "(Simpson Approximation, " << simpson_approx << ", " << error_calc(simpson_approx) << ") " << endl;
-    double two_pt_gaus_approx = TwoPointGausApprox(x_lo, x_hi, h);
-    cout << "(Two-point Gaussian Approximation, " << two_pt_gaus_approx << ", " << error_calc(two_pt_gaus_approx) << ") " << endl;
-    cout << endl;
-    
+//    double x_lo = -1.0;
+//    double x_hi = 1.0;
+//    double h = 0.1;
+//    cout << "(Quadrature Schemes, Numerical Approximation, Error) = " << endl << endl;
+//    double rect_approx = RectApprox(x_lo, x_hi, h);
+//    cout << "(Rectangle Approximation, " << rect_approx << ", " << error_calc(rect_approx) << ") " << endl;
+//    double trapezoid_approx = TrapApprox(x_lo, x_hi, h);
+//    cout << "(Trapezoid Approximation, " << trapezoid_approx << ", " << error_calc(trapezoid_approx) << ") " << endl;
+//    double mid_pt_approx = MidptApprox(x_lo, x_hi, h);
+//    cout << "(Mid-point Approximation, " << mid_pt_approx << ", " << error_calc(mid_pt_approx) << ") " << endl;
+//    double simpson_approx = SimpsonApprox(x_lo, x_hi, h);
+//    cout << "(Simpson Approximation, " << simpson_approx << ", " << error_calc(simpson_approx) << ") " << endl;
+//    double two_pt_gaus_approx = TwoPointGausApprox(x_lo, x_hi, h);
+//    cout << "(Two-point Gaussian Approximation, " << two_pt_gaus_approx << ", " << error_calc(two_pt_gaus_approx) << ") " << endl;
+//    cout << endl;
+//
     //Hacker Practice 4.1
+    cout<< "This is the sparse row_p matrix implementation" << endl << endl;
     comp_r_mat mat_a = construct_compressed_matrix(input_vector);
     cout << "This is the values in mat_a: " << endl;
     for (int n = 0; n<mat_a.value.size() ; n++){
@@ -167,7 +186,7 @@ int main(int argc, const char * argv[]) {
         cout << mat_a.col_id[n] << ", ";
     }
     cout << endl;
-    
+
      //Hacker Practice 4.2
     int element_0_4 = retrieveElement(&mat_a, 0, 4);
     cout << "This is the element at 0,4: " << element_0_4 << endl;
@@ -175,11 +194,11 @@ int main(int argc, const char * argv[]) {
     cout << "This is the element at 4,1: " << element_4_1 << endl;
     int element_2_2 = retrieveElement(&mat_a, 2, 2);
     cout << "This is the element at 2,2: " << element_2_2 << endl;
-    
+
     vector<int> x_test = {5,4,3,2,1};
     vector<int> b_test;
     int check_product = productAx(&mat_a, &x_test, &b_test);
-    cout << check_product << endl;
+    cout << "This is the check of product sparse matrix and X: " << check_product << endl;
     if (check_product == 0) {
         cout << "This is the resulting product of A*x = b, b= { ";
         for (int i = 0; i<b_test.size(); i++){
@@ -188,5 +207,23 @@ int main(int argc, const char * argv[]) {
         cout << "} " << endl;
     }
     
+    cout<< endl << "This is the full matrix implementation" << endl << endl;
+    int elementFM_0_4 = retrieveElementFM(&input_vector, 0, 4);
+    cout << "This is the element at 0,4: " << elementFM_0_4 << endl;
+    int elementFM_4_1 = retrieveElementFM(&input_vector, 4, 1);
+    cout << "This is the element at 4,1: " << elementFM_4_1 << endl;
+    int elementFM_2_2 = retrieveElementFM(&input_vector, 2, 2);
+    cout << "This is the element at 2,2: " << elementFM_2_2 << endl;
+    
+    vector<int> c_test;
+    int check_FM_prod = productAxFM(&input_vector, &x_test, &c_test);
+    cout << "This is the check of product input_vector and X: " << check_FM_prod << endl;
+    if (check_FM_prod == 0) {
+        cout << "This is the resulting product of A*x = b, b= { ";
+        for (int i = 0; i<b_test.size(); i++){
+            cout << b_test[i] << " ";
+        }
+        cout << "} " << endl;
+    }
     return 0;
 }
