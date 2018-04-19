@@ -283,8 +283,8 @@ void h64(){
             cout <<  left << setw(table_width) << setfill(separator) << e_R*100 ;
             err31 = h64_error31(k1, k2, k3, k4, h);
             cout <<  left << setw(table_width) << setfill(separator) << err31;
-            step33 = h * pow((e_R/(abs(err31/x))),(1.0/3.0));
-            cout <<  left << setw(table_width) << setfill(separator) << step33 << endl;
+            h = h * pow((1e-4/(abs(err31/(x + 1e-7)))),(1.0/3.0));
+            cout <<  left << setw(table_width) << setfill(separator) << h << endl;
             //            h = step33;
             
         }
