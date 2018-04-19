@@ -237,7 +237,7 @@ double h64_k4(double x_prev, double t, double h, double k3){
     return h62_dx_dt(x_prev + k3*h, t + h);
 }
 
-double h64_RK4(double x_prev, double k1, double k2, double k3, double k4, double h){
+double h64_RK34(double x_prev, double k1, double k2, double k3, double k4, double h){
     return x_prev + ((1.0/24.0)*((7.0*k1) + (6.0*k2) + (8.0*k3) + (3.0*k4))*h);
 }
 
@@ -277,7 +277,7 @@ void h64(){
             cout <<  left << setw(table_width) << setfill(separator) << x_t;
             k1 = h64_k1(x, t - h); k2 = h64_k2(x, t - h, h, k1); k3 = h64_k3(x, t - h, h, k2); k4 = h64_k4(x, t - h, h, k3);
             
-            x = h64_RK4(x, k1, k2, k3, k4, h);
+            x = h64_RK34(x, k1, k2, k3, k4, h);
             cout <<  left << setw(table_width) << setfill(separator) << x;
             e_R = (abs(x-x_t)/x_t);
             cout <<  left << setw(table_width) << setfill(separator) << e_R*100 ;
