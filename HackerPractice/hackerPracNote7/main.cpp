@@ -12,6 +12,55 @@
 #include "functions_Hacker5_4_to_6.hpp"
 #include "newFunctionsNote7.hpp"
 
+bool checkForInfInVector( vector<double>* v){
+    bool check = false;
+    for( int i = 0; i<v->size(); i++){
+        double inf = isinf((*v)[i]);
+        if(inf){
+            check = true;
+            break;
+        }
+    }
+    return check;
+}
+
+void line_search(vector<double>* d_psi, vector<double>* psi, vector<vector<double>>* J, vector<double>* F, double& t){
+    if( calc_norm(F) > 1e-2 ){
+        vector<double> scaled_dpsi;
+        vector<double> scaled_psi(psi->size());
+        scale_vec(d_psi, t, &scaled_dpsi);
+        vectorSum(psi, &scaled_dpsi, &scaled_psi);
+        vector<vector<double>> scaled_J;
+        vector<double> scaled_F;
+        create_Jacobian_and_F_Nonlin_PDE(&scaled_J, &scaled_F, &scaled_psi, (int)scaled_psi.size());
+        if(checkForInfInVector(&scaled_F)){
+            t *=0.5;
+            line_search(d_psi, psi, J, F, t);
+        }else{
+            double orig_F_norm = calc_norm(F);
+            double scaled_F_norm = calc_norm(&scaled_F);
+            if( scaled_F_norm <= orig_F_norm){
+                (*F) = scaled_F;
+                (*J) = scaled_J;
+                (*psi) = scaled_psi;
+                (*d_psi) = scaled_dpsi;
+                return;
+            }else{
+                if( t/2.0 == 0.0 ){
+                    (*F) = scaled_F;
+                    (*J) = scaled_J;
+                    (*psi) = scaled_psi;
+                    (*d_psi) = scaled_dpsi;
+                    return;
+                }
+                t = t/2;
+                line_search(d_psi, psi, J, F, t);
+            }
+        }
+        
+    }
+    return;
+}
 
 int main(int argc, const char * argv[]) {
     vector<vector<double>> A1 = {{-2, 1, 0, 0}, {1, -2, 1, 0}, {0, 1, -2, 1}, {0, 0, 1, -2}};
@@ -36,10 +85,10 @@ int main(int argc, const char * argv[]) {
         vector<double> dpsi_vec, new_psi;
         vector<vector<double>> Jacobian_Nonlin_PDE;
         vector<double> F;
-        create_Jacobian_and_F_Nonlin_PDE(&Jacobian_Nonlin_PDE, &F, &psi, 9);
+        create_Jacobian_and_F_Nonlin_PDE(&Jacobian_Nonlin_PDE, &F, &psi, psi.size());
         calc_Newton_NL_dx(&F, &Jacobian_Nonlin_PDE, &dpsi_vec);
-        new_psi = psi;
-        vectorSum(&psi, &dpsi_vec, &new_psi);
+        double t = 0.5;
+        line_search(&dpsi_vec, &psi, &Jacobian_Nonlin_PDE, &F, t);
         cout << "x = [";
         for ( int i =0; i< psi.size(); i++){
             cout << psi[i] <<",";
@@ -50,8 +99,9 @@ int main(int argc, const char * argv[]) {
             cout << dpsi_vec[i] <<",";
         }
         cout << "], ";
-//        cout << "f(x)= " << result << endl;
-        cout << endl;
+        cout << "t = " << t;
+        cout << " norm(F) = " << calc_norm(&F) << endl;
+//        cout << endl;
         bool convergence = true;
         for(int i = 0; i<=dpsi_vec.size(); i++){
             if( abs(dpsi_vec[i]) > 1e-9 ){
@@ -66,7 +116,6 @@ int main(int argc, const char * argv[]) {
             cout << "] " << endl;
             break;
         }
-        psi = new_psi;
     
     }
     cout << endl;

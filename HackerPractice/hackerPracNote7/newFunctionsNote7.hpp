@@ -16,10 +16,11 @@
 
 using namespace std;
 
-const double N_D = (10e15); //in centimeters^-3
-const double N_A = (10e17); //in centimeters^-3
-const double h = 10e-3; //in centimeters
 const double n_i = 1.5e10; //normalization term for N(x,y) in centimeter^-3
+const double N_D = (10e15)/n_i; //in centimeters^-3
+const double N_A = (10e17)/n_i; //in centimeters^-3
+const double h = 10e-3; //in centimeters
+
 const double psi_0 = 1.0; // V
 const double epsilon_si = 1.03e-12; //F/cm
 const double L_D = 2.4e-3; // cm
